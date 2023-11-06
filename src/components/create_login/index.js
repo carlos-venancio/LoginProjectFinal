@@ -6,7 +6,6 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Toastify from '../login/Toastify';
 
-
 const DadosLogin = () => {
   const [username, setUsername] = useState('');
   const [name, setName] = useState('');
@@ -17,8 +16,42 @@ const DadosLogin = () => {
   const [passwordError, setPasswordError] = useState('');
   const [showPasswordError, setShowPasswordError] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // Novo estado para controlar visibilidade da senha
-
   const navigate = useNavigate();
+  
+  async function carregarButtonGoogle() {
+    const google = await fetch('https://accounts.google.com/gsi/client', {
+      header: {
+        'cors': ''
+      }
+    })
+
+    // CONFIGURAÇÃO DO BUTTON "LOGAR COM O GOOGLE"
+    function handleCredentialResponse(response) {
+      console.log("Encoded JWT ID token: " + response.credential);
+    }
+
+    google.accounts.id.initialize({
+      client_id: "484620940572-6kjm9ga1t6426lfi6557t07440o5tu9h.apps.googleusercontent.com",
+      callback: handleCredentialResponse
+    });
+
+    google.accounts.id.renderButton(
+      document.getElementById("buttonDiv"),
+      { theme: "outline", size: "large" }  // customization attributes
+    );
+
+    google.accounts.id.prompt(); // also display the One Tap dialog
+
+    return (
+      <>
+         <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+      </>
+    )
+  }
+
+  carregarButtonGoogle()
+
 
   const handleLogin = async () => {
     if (!isEmailValid) {
@@ -89,6 +122,7 @@ const DadosLogin = () => {
   const passwordInputClass = showPasswordError
   ? "shadow-inner border border-solid border border-slate-400  focus:border-red-500 focus:border-2 rounded-md  text-xs p-1.5 w-60 outline-none"
   : "shadow-inner border border-solid border border-slate-400  focus:border-blue-500 focus:border-2 rounded-md  text-xs p-1.5 w-60 outline-none";
+
 
   return (
     <div className="bg-image h-screen">
@@ -175,7 +209,9 @@ const DadosLogin = () => {
                 I accept the <a className="text-cyan-400">terms and conditions</a>
               </p>
             </label>
-          </div>
+          </div> 
+    
+          <div id="buttonDiv"></div>
 
           <button
             type="button"
