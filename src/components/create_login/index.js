@@ -17,40 +17,6 @@ const DadosLogin = () => {
   const [showPasswordError, setShowPasswordError] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // Novo estado para controlar visibilidade da senha
   const navigate = useNavigate();
-  
-  async function carregarButtonGoogle() {
-    const google = await fetch('https://accounts.google.com/gsi/client', {
-      header: {
-        'cors': ''
-      }
-    })
-
-    // CONFIGURAÇÃO DO BUTTON "LOGAR COM O GOOGLE"
-    function handleCredentialResponse(response) {
-      console.log("Encoded JWT ID token: " + response.credential);
-    }
-
-    google.accounts.id.initialize({
-      client_id: "484620940572-6kjm9ga1t6426lfi6557t07440o5tu9h.apps.googleusercontent.com",
-      callback: handleCredentialResponse
-    });
-
-    google.accounts.id.renderButton(
-      document.getElementById("buttonDiv"),
-      { theme: "outline", size: "large" }  // customization attributes
-    );
-
-    google.accounts.id.prompt(); // also display the One Tap dialog
-
-    return (
-      <>
-         <script src="https://accounts.google.com/gsi/client" async defer></script>
-
-      </>
-    )
-  }
-
-  carregarButtonGoogle()
 
 
   const handleLogin = async () => {
@@ -210,8 +176,6 @@ const DadosLogin = () => {
               </p>
             </label>
           </div> 
-    
-          <div id="buttonDiv"></div>
 
           <button
             type="button"
@@ -224,6 +188,8 @@ const DadosLogin = () => {
           {!termsAccepted && showTermsNotification && (
             <p className="text-red-500 text-xs">You must accept the terms.</p>
           )}
+
+          <div id="buttonDiv"></div>
 
           <div className="text-xs p-0 mt-5">
             <p>
