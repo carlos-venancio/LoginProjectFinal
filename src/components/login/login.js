@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Api from '../../api';
 import { toast } from 'react-toastify';
 import Toastify from './Toastify';
-
+import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
 
 const Login = ({ setIsLoggedIn }) => {
   const [username, setUsername] = useState('');
@@ -13,17 +13,14 @@ const Login = ({ setIsLoggedIn }) => {
 
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
+  const handleLogin = async (url,body) => {
     if (!isEmailValid || !password) { 
       toast.error("Invalid email or password");
       return;
     }
 
     try {
-      const response = await Api.post(`https://api-login-mn7h.onrender.com/login`, {
-        email: username,
-        password: password,
-      });
+      const response = await Api.post(`https://api-login-mn7h.onrender.com/${url}`, body);
     
       if (response.status === 200) {
         const token = response.data.token;
@@ -69,59 +66,80 @@ const Login = ({ setIsLoggedIn }) => {
   : "shadow-inner border border-solid border border-slate-400 focus:border-red-500 focus:border-2 rounded-md text-xs p-1.5 w-60 outline-none";
 
   return (
-    <div className='bg-image h-screen'>
-      <div className="flex justify-center items-center h-screen">
-        <div className="flex flex-wrap justify-center max-sm:max-h-xs h-auto max-sm:max-w-xs w-80 shadow-2xl p-8 rounded-xl bg-white ">
-          <div className='text-3xl  mb-4' >
-            <h1 >Welcome Back </h1>
-            <p className='text-xs mt-2'>Enter your Credentials to access your account</p>
-          </div>
-          <div>
-            <div className="mt-2 ">
-              <p className=' text-sm' htmlFor="username">E-Mail</p>
+    <GoogleOAuthProvider clientId="484620940572-6kjm9ga1t6426lfi6557t07440o5tu9h.apps.googleusercontent.com">
+      
+      <div className='bg-image h-screen'>
+        <div className="flex justify-center items-center h-screen">
+          <div className="flex flex-wrap justify-center max-sm:max-h-xs h-auto max-sm:max-w-xs w-80 shadow-2xl p-8 rounded-xl bg-white ">
+            <div className='text-3xl  mb-4' >
+              <h1 >Welcome Back </h1>
+              <p className='text-xs mt-2'>Enter your Credentials to access your account</p>
+            </div>
+            <div>
+              <div className="mt-2 ">
+                <p className=' text-sm' htmlFor="username">E-Mail</p>
+                  <input
+                    className={emailInputClass}
+                    type="text"
+                    id="username"
+                    placeholder='Enter your email'
+                    value={username}
+                    maxLength={40}
+                    onChange={(e) => {
+                      setUsername(e.target.value);
+                      validateEmail(e.target.value);
+                    }}
+                  />
+                {!isEmailValid && <p className="text-red-800 text-xs">Enter a valid email address.</p>}
+            </div>
+
+            </div>
+            <div>
+              <div className="mt-2 ">
+                <p className=' text-sm' htmlFor="password">Password</p>
                 <input
                   className={emailInputClass}
-                  type="text"
-                  id="username"
-                  placeholder='Enter your email'
-                  value={username}
-                  maxLength={40}
-                  onChange={(e) => {
-                    setUsername(e.target.value);
-                    validateEmail(e.target.value);
-                  }}
+                  type="password"
+                  id="password"
+                  placeholder='Enter your password'
+                  value={password}
+                  maxLength={12}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
-              {!isEmailValid && <p className="text-red-800 text-xs">Enter a valid email address.</p>}
-           </div>
-
-          </div>
-          <div>
-            <div className="mt-2 ">
-              <p className=' text-sm' htmlFor="password">Password</p>
-              <input
-                className={emailInputClass}
-                type="password"
-                id="password"
-                placeholder='Enter your password'
-                value={password}
-                maxLength={12}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              </div>
             </div>
-          </div>
-          <div className='bottom'>
-            <button className="mt-7 bg-gray-800 hover:bg-gray-900 active:bg-blue-950 text-white text-sm max-sm:max-w-xs w-60 h-8 rounded-lg hover:scale-105 transition delay-75 duration-300 ease-in-out" onClick={handleLogin}>
-              Login
-            </button>
-          </div>
-          <div className='text-xs p-0 mt-10'>
-            <p className='account' >Don’t have an account?  <Link to="/Index" className='text-cyan-400'>  Sign Up </Link> </p>
-          </div>
+            <div className='bottom'>
+              <button className="mt-7 bg-gray-800 hover:bg-gray-900 active:bg-blue-950 text-white text-sm max-sm:max-w-xs w-60 h-8 rounded-lg hover:scale-105 transition delay-75 duration-300 ease-in-out" 
+                      onClick={handleLogin('login', {
+                        email: username,
+                        password: password
+                      })}>
 
-          <Toastify />
+                Login
+              </button>
+
+              <GoogleLogin 
+                  onSuccess={response => {
+                      console.log(response.credential)
+                      handleLogin('login/social', {
+                        token: response.credential
+                      })
+                  }}
+                  onError={(e) => {
+                      console.error('Login Falhou\n' + e)
+                  }}
+              />
+
+            </div>
+            <div className='text-xs p-0 mt-10'>
+              <p className='account' >Don’t have an account?  <Link to="/Index" className='text-cyan-400'>  Sign Up </Link> </p>
+            </div>
+
+            <Toastify />
+          </div>
         </div>
       </div>
-    </div>
+    </GoogleOAuthProvider>
   );
 };
 

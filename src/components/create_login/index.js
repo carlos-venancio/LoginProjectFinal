@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Api from '../../api';
 import { useNavigate } from 'react-router-dom';
@@ -17,7 +17,6 @@ const DadosLogin = () => {
   const [showPasswordError, setShowPasswordError] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // Novo estado para controlar visibilidade da senha
   const navigate = useNavigate();
-
 
   const handleLogin = async () => {
     if (!isEmailValid) {
