@@ -14,12 +14,13 @@ const Login = ({ setIsLoggedIn }) => {
   const navigate = useNavigate();
 
   const handleLogin = async (url,body) => {
-    if (!isEmailValid || !password) { 
+    if (url === 'login' && (!isEmailValid || !password)) { 
       toast.error("Invalid email or password");
       return;
     }
 
     try {
+      console.log('pedindo os token para navegar')
       const response = await Api.post(`https://api-login-mn7h.onrender.com/${url}`, body);
     
       if (response.status === 200) {
