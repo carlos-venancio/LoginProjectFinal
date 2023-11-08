@@ -3,7 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import Api from '../../api';
 import { toast } from 'react-toastify';
 import Toastify from './Toastify';
-import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
+import { useGoogleLogin, googleLogout } from '@react-oauth/google';
+import axios from 'axios';
+import BtnGoogle  from './btnGoogle';
 
 const Login = ({ setIsLoggedIn }) => {
   const [username, setUsername] = useState('');
@@ -13,42 +15,89 @@ const Login = ({ setIsLoggedIn }) => {
 
   const navigate = useNavigate();
 
-  const handleLogin = async (url,body) => {
-    if (url === 'login' && (!isEmailValid || !password)) { 
+  const google = useGoogleLogin({
+    
+    onSuccess: async (codeResponse) => {
+      
+      try {
+        const res = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: {
+            'Authorization': `Bearer ${codeResponse.access_token}`
+          }
+        })
+        
+        handleGoogle(res.data)
+      }
+      
+      catch(e) {
+        console.log(e);
+      }
+    },
+
+    onError: e => console.log(e)
+  });
+
+  async function handleGoogle(credential)  {
+
+    try {
+        const response = await Api.post(`https://api-login-mn7h.onrender.com/login/social`, {
+          sub: credential.sub,
+          email: credential.email
+        });
+      
+        treatResponse(response);
+    }
+
+    catch(e) {
+      console.error("Erro:",e)
+      toast.error(e.message,{ autoClose: 5000 })
+    }
+        
+  }
+
+  const handleLogin = async () => {
+
+    if (!isEmailValid || !password) { 
       toast.error("Invalid email or password");
       return;
     }
 
     try {
-      console.log('pedindo os token para navegar')
-      const response = await Api.post(`https://api-login-mn7h.onrender.com/${url}`, body);
-    
-      if (response.status === 200) {
-        const token = response.data.token;
-        const name = response.data.username;
-    
-        localStorage.setItem('token', token);
-        localStorage.setItem("username", name);
-    
-        setIsLoggedInLocally(true);
-        setIsLoggedIn(true);
-        navigate('/Home');
-        
-      } else if (response.status === 401) {
-        toast.error('Não autorizado', { autoClose: 5000 });
-    
-      } else {
-    
-        console.error('Erro:', response.status, response.data.message);
-        toast.error('Erro', { autoClose: 5000 });
-      }
+      const response = await Api.post(`https://api-login-mn7h.onrender.com/login`, {
+        email: username,
+        password: password
+      });
+      console.log(response)
+      treatResponse(response);
+      googleLogout();
     
     } catch (error) {
       console.error('Erro inesperado:', error.message);
       toast.error('Email ou senha inválidos', { autoClose: 5000 });
     }
+  }
+
+  async function treatResponse(response){
     
-    
+    if (response.status === 200 || response.status === 201) {
+      const token = response.data.token;
+      const name = response.data.username;
+  
+      localStorage.setItem('token', token);
+      localStorage.setItem("username", name);
+  
+      setIsLoggedInLocally(true);
+      setIsLoggedIn(true);
+      navigate('/Home');
+      
+    } else if (response.status === 401) {
+      toast.error('Não autorizado', { autoClose: 5000 });
+  
+    } else {
+  
+      console.error('Erro:', response.status, response.data.message);
+      toast.error('Erro', { autoClose: 5000 });
+    }
 
   }
 
@@ -65,10 +114,12 @@ const Login = ({ setIsLoggedIn }) => {
   const emailInputClass = isEmailValid
   ? "shadow-inner border border-solid border border-slate-400 focus:border-blue-500 focus:border-2 rounded-md text-xs p-1.5 w-60 outline-none"
   : "shadow-inner border border-solid border border-slate-400 focus:border-red-500 focus:border-2 rounded-md text-xs p-1.5 w-60 outline-none";
+  
+ 
+  
+
 
   return (
-    <GoogleOAuthProvider clientId="484620940572-6kjm9ga1t6426lfi6557t07440o5tu9h.apps.googleusercontent.com">
-      
       <div className='bg-image h-screen'>
         <div className="flex justify-center items-center h-screen">
           <div className="flex flex-wrap justify-center max-sm:max-h-xs h-auto max-sm:max-w-xs w-80 shadow-2xl p-8 rounded-xl bg-white ">
@@ -111,25 +162,14 @@ const Login = ({ setIsLoggedIn }) => {
             </div>
             <div className='bottom'>
               <button className="mt-7 bg-gray-800 hover:bg-gray-900 active:bg-blue-950 text-white text-sm max-sm:max-w-xs w-60 h-8 rounded-lg hover:scale-105 transition delay-75 duration-300 ease-in-out" 
-                      onClick={handleLogin('login', {
-                        email: username,
-                        password: password
-                      })}>
-
+                      onClick={handleLogin}>
                 Login
               </button>
 
-              <GoogleLogin 
-                  onSuccess={response => {
-                      console.log(response.credential)
-                      handleLogin('login/social', {
-                        token: response.credential
-                      })
-                  }}
-                  onError={(e) => {
-                      console.error('Login Falhou\n' + e)
-                  }}
-              />
+              
+              <BtnGoogle onClick={google}>
+                  Sign in with Google 
+              </BtnGoogle> 
 
             </div>
             <div className='text-xs p-0 mt-10'>
@@ -140,7 +180,7 @@ const Login = ({ setIsLoggedIn }) => {
           </div>
         </div>
       </div>
-    </GoogleOAuthProvider>
+
   );
 };
 
