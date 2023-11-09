@@ -10,10 +10,10 @@ const Login = ({ setIsLoggedIn }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isEmailValid, setIsEmailValid] = useState(true);
-  const [isLoggedInLocally, setIsLoggedInLocally] = useState(false);
 
   const navigate = useNavigate();
 
+  // permite o acesso aos dados do cliente logado pelo google
   const google = useGoogleLogin({
     onSuccess: async (codeResponse) => {
       try {
@@ -22,8 +22,6 @@ const Login = ({ setIsLoggedIn }) => {
             'Authorization': `Bearer ${codeResponse.access_token}`
           }
         })
-        
-        console.log(res)
         handleGoogle(res.data)
       }
       catch(e) {
@@ -34,11 +32,11 @@ const Login = ({ setIsLoggedIn }) => {
   });
 
 
+  // faz a requiisção para a rota que gerencia os logins por midia social
   async function handleGoogle(credential)  {
 
     try {
         const response = await Api.post(`/login/social`, credential);
-      
         treatResponse(response);
     }
 
@@ -63,7 +61,6 @@ const Login = ({ setIsLoggedIn }) => {
       });
       console.log(response)
       treatResponse(response);
-      googleLogout();
     
     } catch (error) {
       console.error('Erro inesperado:', error.message);
@@ -94,24 +91,16 @@ const Login = ({ setIsLoggedIn }) => {
 
   }
 
-
   const validateEmail = () => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     setIsEmailValid(re.test(username));
   };
-
-  if (isLoggedInLocally) {
-    navigate('/Home');
-  }
 
   const emailInputClass = isEmailValid
   ? "shadow-inner border border-solid border border-slate-400 focus:border-blue-500 focus:border-2 rounded-md text-xs p-1.5 w-60 outline-none"
   : "shadow-inner border border-solid border border-slate-400 focus:border-red-500 focus:border-2 rounded-md text-xs p-1.5 w-60 outline-none";
   
  
-  
-
-
   return (
       <div className='bg-image h-screen'>
         <div className="flex justify-center items-center h-screen">
