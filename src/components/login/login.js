@@ -5,7 +5,6 @@ import { toast } from 'react-toastify';
 import Toastify from './Toastify';
 import { useGoogleLogin, googleLogout } from '@react-oauth/google';
 import axios from 'axios';
-import BtnGoogle  from './btnGoogle';
 
 const Login = ({ setIsLoggedIn }) => {
   const [username, setUsername] = useState('');
@@ -16,9 +15,7 @@ const Login = ({ setIsLoggedIn }) => {
   const navigate = useNavigate();
 
   const google = useGoogleLogin({
-    
     onSuccess: async (codeResponse) => {
-      
       try {
         const res = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
           headers: {
@@ -26,24 +23,21 @@ const Login = ({ setIsLoggedIn }) => {
           }
         })
         
+        console.log(res)
         handleGoogle(res.data)
       }
-      
       catch(e) {
         console.log(e);
       }
     },
-
     onError: e => console.log(e)
   });
+
 
   async function handleGoogle(credential)  {
 
     try {
-        const response = await Api.post(`https://api-login-mn7h.onrender.com/login/social`, {
-          sub: credential.sub,
-          email: credential.email
-        });
+        const response = await Api.post(`/login/social`, credential);
       
         treatResponse(response);
     }
@@ -63,7 +57,7 @@ const Login = ({ setIsLoggedIn }) => {
     }
 
     try {
-      const response = await Api.post(`https://api-login-mn7h.onrender.com/login`, {
+      const response = await Api.post(`/login`, {
         email: username,
         password: password
       });
@@ -86,7 +80,6 @@ const Login = ({ setIsLoggedIn }) => {
       localStorage.setItem('token', token);
       localStorage.setItem("username", name);
   
-      setIsLoggedInLocally(true);
       setIsLoggedIn(true);
       navigate('/Home');
       
@@ -167,9 +160,10 @@ const Login = ({ setIsLoggedIn }) => {
               </button>
 
               
-              <BtnGoogle onClick={google}>
+              <button className="p-5 items-center flex mt-7 justify-center bg-white-800  text-black  max-sm:max-w-xs w-60 h-8 rounded-lg hover:scale-105 border border-gray-300" onClick={google}>
+                <img src="/logoGoogle.png" className="h-7 mr-4"/>
                   Sign in with Google 
-              </BtnGoogle> 
+              </button>
 
             </div>
             <div className='text-xs p-0 mt-10'>
