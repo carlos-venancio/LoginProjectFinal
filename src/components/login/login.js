@@ -13,7 +13,7 @@ const Login = ({ setIsLoggedIn }) => {
 
   const navigate = useNavigate();
 
-  // permite o acesso aos dados do cliente logado pelo google
+  /* permite o acesso aos dados do cliente logado pelo google */
   const google = useGoogleLogin({
     onSuccess: async (codeResponse) => {
       try {
@@ -32,7 +32,7 @@ const Login = ({ setIsLoggedIn }) => {
   });
 
 
-  // faz a requiisção para a rota que gerencia os logins por midia social
+  /* faz a requiisção para a rota que gerencia os logins por midia social */
   async function handleGoogle(credential)  {
 
     try {
@@ -47,6 +47,7 @@ const Login = ({ setIsLoggedIn }) => {
         
   }
 
+  /* faz o acesso de um usuario comum */
   const handleLogin = async () => {
 
     if (!isEmailValid || !password) { 
@@ -68,6 +69,7 @@ const Login = ({ setIsLoggedIn }) => {
     }
   }
 
+  /* verifica a resposta e redireciona o usuario */ 
   async function treatResponse(response){
     
     if (response.status === 200 || response.status === 201) {
