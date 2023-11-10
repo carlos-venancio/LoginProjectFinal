@@ -3,7 +3,7 @@ import Login from './login';
 
 export default function LoginWithGoogle({ setIsLoggedIn }){
     return (
-        <GoogleOAuthProvider clientId="484620940572-6kjm9ga1t6426lfi6557t07440o5tu9h.apps.googleusercontent.com">
+        <GoogleOAuthProvider clientId="484620940572-eqao4bhgsnatnqt912kikknp6sah8r2f.apps.googleusercontent.com">
             <Login setIsLoggedIn={setIsLoggedIn} />
         </GoogleOAuthProvider>
     )
